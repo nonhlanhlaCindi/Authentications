@@ -2,6 +2,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from database import get_db_connection
 
 app = Flask(__name__)
 
@@ -57,7 +58,7 @@ def register():
         if existing_user:
             flash('Email already registered', 'danger')
             conn.close()
-            return redirect(url_for('register.html'))
+            return redirect(url_for('register'))
 
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         cur.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", (username, email, hashed_password))
@@ -65,7 +66,7 @@ def register():
         conn.close()
 
         flash('Registration successful! You can now log in.', 'success')
-        return redirect(url_for('login.html'))
+        return redirect(url_for('login'))
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -97,7 +98,8 @@ def dashboard():
 def logout():
     logout_user()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('login.html'))
+    return redirect(url_for('login'))  # Fixed
+
 
 if __name__ == '__main__':
     app.run(debug=True)
